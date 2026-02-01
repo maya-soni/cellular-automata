@@ -1,0 +1,85 @@
+//             alive         death
+let colors = ['#87CEEB', '#800080']
+let grid = []
+let matrix = []
+let w = 10
+let cols, rows
+
+function setup () {
+  createCanvas(400, 400)
+  cols = width / 2
+  rows = height / 2
+  for (let i = 0; i < cols; i++) {
+    grid[i] = []
+    matrix[i] = []
+    for (let j = 0; j < rows; j++) {
+      let randomNumber = random(colors.length)
+      matrix[i][j] = floor(randomNumber)
+      grid[i][j] = floor(randomNumber)
+    }
+  }
+}
+
+function countNeighbors (matrixOfStates) {
+  // matrix
+  let countMatrix = []
+  let rows = matrixOfStates.length
+  let cols = rows
+  let possibleSteps = [[-1,-1],[-1,0],[-1, 1],[0,-1],[0, 1],[1,-1],[1,0],[1,1] ]
+  for (let i = 0; i < rows; i++) {
+    countMatrix[i] = []
+    for (let j = 0; j < cols; j++) {
+        let countNeighbors = 0;
+        for(let step of possibleSteps){
+            p_i = step[0] + i
+            p_j = step[1] + j
+            if(p_i >= 0 && p_i<rows && p_j >= 0 && p_j<cols && matrix[p_i][p_j] == 1 ){
+                countNeighbors += 1;
+            }
+        }
+        countMatrix[i][j] = countNeighbors
+    }
+  }
+  return countMatrix;
+}
+
+function fillMatrix(matrixOfStates,countNeighborsMatrix){
+    let rows = matrixOfStates.length
+    let cols = rows
+    for (let i=0;i<rows;i++) {
+        for( let j = 0; j<cols; j++){
+            let cellState = matrixOfStates[i][j];
+            let countNeighbors = countNeighborsMatrix[i][j];
+
+            if(cellState == 1){ // Cell is alive
+                if(countNeighbors >= 4 ){
+                    matrixOfStates[i][j] = 0;
+                }else if(countNeighbors>1 && countNeighbors < 4){ 
+                    matrixOfStates [i][j] = 1;
+                }else{
+                    matrixOfStates[i][j] = 0;
+                }
+            }else{ //Cell is dead
+                if(countNeighbors == 3){
+                   matrixOfStates[i][j] = 1;
+                }
+            }
+            
+        }
+    }
+    return matrixOfStates;
+}
+
+function draw () {
+  background(220)
+
+  let countMatrix = countNeighbors(matrix);
+  let nextMatrix = fillMatrix(matrix,countMatrix);
+  for (let i = 0; i < cols; i++) {
+    for (let j = 0; j < rows; j++) {
+      let state = matrix[i][j]
+      fill(colors[state])
+      rect(i * w, j * w, w, w)
+    }
+  }
+}
